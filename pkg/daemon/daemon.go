@@ -2,8 +2,7 @@ package daemon
 
 import (
 	"context"
-	"strconv"
-	"strings"
+	"errors"
 	"sync"
 	"time"
 
@@ -65,7 +64,7 @@ func (d *Daemon) Start(ctx context.Context) error {
 func (d *Daemon) sync(ctx context.Context) {
 	logger := log.GetLogger(ctx)
 	logger.Infof("starting service watcher")
-	d.updateNodeCPU(ctx)
+	d.runCPUSync(ctx)
 	for {
 		select {
 		case <-ctx.Done():
@@ -73,9 +72,16 @@ func (d *Daemon) sync(ctx context.Context) {
 			return
 		case <-time.After(time.Duration(d.Config.SyncIntervalSeconds) * time.Second):
 		}
-		d.updateNodeCPU(ctx)
+		d.runCPUSync(ctx)
 	}
 }
+
+func (d *Daemon) runCPUSync(ctx context.Context) error {
+	err1 := d.updateNodeCPU(ctx)
+	err2 := d.labelCurrentCPUGovernor(ctx)
+	return errors.Join(err1, err2)
+}
+
 func (d *Daemon) updateNodeCPU(ctx context.Context) error {
 	logger := log.GetLogger(ctx)
 	logger.Infof("fetching nodes")
@@ -86,15 +92,9 @@ func (d *Daemon) updateNodeCPU(ctx context.Context) error {
 	}
 	logger.Infof("node %v", node)
 
-	if _, ok := node.Metadata.Labels[NodeLabelOverclock]; !ok {
+	if _, ok := node.Metadata.Labels[NodeLabelCPUOverclock]; !ok {
 		logger.Infof("overclock not enabled, skipping")
 		return nil
-	}
-
-	overclock, err := strconv.ParseBool(strings.TrimSpace(node.Metadata.Labels[NodeLabelOverclock]))
-	if err != nil || !overclock {
-		logger.Infof("overclock not enabled, skipping")
-		return SetCPUGovernor(ctx, d.Config.Node, "powersave")
 	}
 
 	pods, err := kubectl.GetPodsForNode(ctx, d.Config.Node)
@@ -103,22 +103,35 @@ func (d *Daemon) updateNodeCPU(ctx context.Context) error {
 		return err
 	}
 
-	govenor := "powersave"
+	govenor := CPUGovernorPowersave
 	logger.Infof("pods: %v", pods)
 	for _, pod := range pods {
-		if _, ok := pod.Metadata.Labels[PodLabelOverclock]; !ok {
-			continue
-		}
-		overclock, err := strconv.ParseBool(strings.TrimSpace(pod.Metadata.Labels[PodLabelOverclock]))
-		if err != nil {
-			logger.Infof("Error parsing overclock label: %v", err)
-			continue
-		}
-		if overclock {
-			govenor = "performance"
+		if _, ok := pod.Metadata.Labels[PodLabelCPUOverclock]; ok {
+			govenor = CPUGovernorPerformance
 			break
 		}
 	}
 	logger.Infof("setting CPU governor to %v", govenor)
-	return SetCPUGovernor(ctx, d.Config.Node, govenor)
+	err = SetCPUGovernor(ctx, govenor)
+	if err != nil {
+		logger.Infof("Error setting CPU governor: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (d *Daemon) labelCurrentCPUGovernor(ctx context.Context) error {
+	logger := log.GetLogger(ctx)
+	governor, err := GetCPUGovernor(ctx)
+	if err != nil {
+		logger.Infof("Error getting CPU governor: %v", err)
+		return err
+	}
+	logger.Infof("current CPU governor: %v", governor)
+	err = kubectl.LabelNode(ctx, d.Config.Node, NodeLabelCPUGovernor, governor)
+	if err != nil {
+		logger.Infof("Error labeling node: %v", err)
+		return err
+	}
+	return nil
 }

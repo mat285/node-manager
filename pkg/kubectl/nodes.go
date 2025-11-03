@@ -31,3 +31,11 @@ func GetNode(ctx context.Context, name string) (*Node, error) {
 	}
 	return &node, nil
 }
+
+func LabelNode(ctx context.Context, name string, key string, value string) error {
+	_, err := exec.CommandContext(ctx, "kubectl", "label", "node", name, key+"="+value).Output()
+	if err != nil {
+		return err
+	}
+	return nil
+}
