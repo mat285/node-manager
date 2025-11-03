@@ -23,9 +23,13 @@ func cmd(ctx context.Context) *cobra.Command {
 				Level: "info",
 			})
 			ctx = log.WithLogger(ctx, logger)
+			hostname, err := os.Hostname()
+			if err != nil {
+				return err
+			}
 			config := daemon.Config{
 				SyncIntervalSeconds: 30,
-				Node:                os.Getenv("HOSTNAME"),
+				Node:                hostname,
 			}
 			if configPath != "" {
 				data, err := os.ReadFile(configPath)
