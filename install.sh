@@ -55,6 +55,11 @@ sudo mkdir -p /etc/node-manager
 sudo mv example.yml /etc/node-manager/example.yml
 sudo chown root:root /etc/node-manager/example.yml
 
+echo "Copying current kubectl config to root"
+sudo mkdir -p /root/.kube || true
+sudo cp ~/.kube/config /root/.kube/config
+sudo chown root:root /root/.kube/config
+
 sudo systemctl daemon-reload
 sudo systemctl enable node-manager.service
 sudo systemctl start node-manager.service
