@@ -44,7 +44,7 @@ func main() {
 			fmt.Println("Setting up node:", node)
 			lock.Unlock()
 			cmd := exec.Command("ssh", "-A", node, "-T", command)
-			cmd.Env = append(os.Environ(), `SUDO_OPTS="-S"`)
+			cmd.Env = append(os.Environ(), `SUDO_OPTS="-S"`, `VERSION=${`+version+`}`)
 			output, err := cmd.CombinedOutput()
 			lock.Lock()
 			fmt.Println(string(output))

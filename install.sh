@@ -37,23 +37,23 @@ sudo systemctl stop node-manager.service || true
 sudo systemctl disable node-manager.service || true
 echo "Installing node-manager server version ${VERSION}..."
 
+echo "Downloading https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager-server_${OS}_${ARCH}"
 curl --fail-with-body -Lo node-manager https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager-server_${OS}_${ARCH}
 sudo mv node-manager /bin/node-manager
 sudo chown root:root /bin/node-manager
 sudo chmod a+x /bin/node-manager
 
+echo "Downloading node-manager.service https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager.service"
 curl --fail-with-body -Lo node-manager.service https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager.service
 sudo mv node-manager.service /etc/systemd/system/node-manager.service
 sudo chmod 644 /etc/systemd/system/node-manager.service
 sudo chown root:root /etc/systemd/system/node-manager.service
 
-curl --fail-with-body -Lo node-manager https://github.com/mat285/node-manager/releases/download/${VERSION}/example.yml
+echo "Downloading example.yml https://github.com/mat285/node-manager/releases/download/${VERSION}/example.yml"
+curl --fail-with-body -Lo example.yml https://github.com/mat285/node-manager/releases/download/${VERSION}/example.yml
 sudo mkdir -p /etc/node-manager
-sudo mv node-manager /etc/node-manager/example.yml
+sudo mv example.yml /etc/node-manager/example.yml
 sudo chown root:root /etc/node-manager/example.yml
-
-sudo mkdir -p /etc/node-manager
-sudo chown root:root /etc/node-manager
 
 sudo systemctl daemon-reload
 sudo systemctl enable node-manager.service
