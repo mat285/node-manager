@@ -10,7 +10,7 @@ SyslogIdentifier=node-manager
 User=root
 Group=root
 Environment=PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin
-ExecStart=/bin/node-manager --config-path=/etc/node-manager/example.yml
+ExecStart=/bin/node-manager daemon --config-path=/etc/node-manager/example.yml
 Restart=always
 ExecReload=/bin/kill -HUP $MAINPID
 
