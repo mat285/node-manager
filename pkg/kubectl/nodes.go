@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os/exec"
 	"strings"
+
+	"github.com/mat285/node-manager/pkg/log"
 )
 
 type Node struct {
@@ -46,8 +48,9 @@ func GetNodes(ctx context.Context) ([]string, error) {
 }
 
 func LabelNode(ctx context.Context, name string, key string, value string) error {
-	_, err := exec.CommandContext(ctx, "kubectl", "label", "node", name, key+"="+value).Output()
+	output, err := exec.CommandContext(ctx, "kubectl", "label", "node", name, key+"="+value).Output()
 	if err != nil {
+		log.GetLogger(ctx).Infof("Error labeling node %s: %v: %s", name, err, string(output))
 		return err
 	}
 	return nil
