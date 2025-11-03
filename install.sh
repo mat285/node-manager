@@ -37,8 +37,8 @@ sudo systemctl stop node-manager.service || true
 sudo systemctl disable node-manager.service || true
 echo "Installing node-manager server version ${VERSION}..."
 
-echo "Downloading https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager-server_${OS}_${ARCH}"
-curl --fail-with-body -Lo node-manager https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager-server_${OS}_${ARCH}
+echo "Downloading https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager_${OS}_${ARCH}"
+curl --fail-with-body -Lo node-manager https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager_${OS}_${ARCH}
 sudo mv node-manager /bin/node-manager
 sudo chown root:root /bin/node-manager
 sudo chmod a+x /bin/node-manager
