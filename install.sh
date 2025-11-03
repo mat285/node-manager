@@ -4,7 +4,7 @@ set -e
 
 VERSION=$1
 if [ -z "$VERSION" ]; then
-    VERSION=$(curl -sL https://api.github.com/repos/mat285/gateway/releases/latest | jq -r .name)
+    VERSION=$(curl -sL https://api.github.com/repos/mat285/node-manager/releases/latest | jq -r .name)
     echo "No version specified, using latest release: ${VERSION}"
 fi
 
@@ -33,29 +33,29 @@ fi
 
 echo "Detected OS: ${OS}, Architecture: ${ARCH}"
 
-sudo systemctl stop gateway.service || true
-sudo systemctl disable gateway.service || true
-echo "Installing Gateway server version ${VERSION}..."
+sudo systemctl stop node-manager.service || true
+sudo systemctl disable node-manager.service || true
+echo "Installing node-manager server version ${VERSION}..."
 
-curl --fail-with-body -Lo gateway https://github.com/mat285/gateway/releases/download/${VERSION}/gateway-server_${OS}_${ARCH}
-sudo mv gateway /bin/gateway
-sudo chown root:root /bin/gateway
-sudo chmod a+x /bin/gateway
+curl --fail-with-body -Lo node-manager https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager-server_${OS}_${ARCH}
+sudo mv node-manager /bin/node-manager
+sudo chown root:root /bin/node-manager
+sudo chmod a+x /bin/node-manager
 
-curl --fail-with-body -Lo gateway.service https://github.com/mat285/gateway/releases/download/${VERSION}/gateway.service
-sudo mv gateway.service /etc/systemd/system/gateway.service
-sudo chmod 644 /etc/systemd/system/gateway.service
-sudo chown root:root /etc/systemd/system/gateway.service
+curl --fail-with-body -Lo node-manager.service https://github.com/mat285/node-manager/releases/download/${VERSION}/node-manager.service
+sudo mv node-manager.service /etc/systemd/system/node-manager.service
+sudo chmod 644 /etc/systemd/system/node-manager.service
+sudo chown root:root /etc/systemd/system/node-manager.service
 
-curl --fail-with-body -Lo gateway https://github.com/mat285/gateway/releases/download/${VERSION}/example.yml
-sudo mkdir -p /etc/gateway
-sudo mv gateway /etc/gateway/example.yml
-sudo chown root:root /etc/gateway/example.yml
+curl --fail-with-body -Lo node-manager https://github.com/mat285/node-manager/releases/download/${VERSION}/example.yml
+sudo mkdir -p /etc/node-manager
+sudo mv node-manager /etc/node-manager/example.yml
+sudo chown root:root /etc/node-manager/example.yml
 
-sudo mkdir -p /etc/gateway
-sudo chown root:root /etc/gateway
+sudo mkdir -p /etc/node-manager
+sudo chown root:root /etc/node-manager
 
 sudo systemctl daemon-reload
-sudo systemctl enable gateway.service
-sudo systemctl start gateway.service
-echo "Gateway server installed and started successfully."
+sudo systemctl enable node-manager.service
+sudo systemctl start node-manager.service
+echo "node-manager server installed and started successfully."
