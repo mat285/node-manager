@@ -15,9 +15,9 @@ import (
 func cmd(ctx context.Context) *cobra.Command {
 	var configPath = ""
 	cmd := &cobra.Command{
-		Use:   "server",
-		Short: "Start the daemon service",
-		Long:  "Start the daemon service",
+		Use:   "daemon",
+		Short: "Start the node manager daemon",
+		Long:  "Start the node manager daemon",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger := log.New(log.Config{
 				Level: "info",

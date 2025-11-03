@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os/exec"
+	"strings"
 )
 
 type Node struct {
@@ -30,6 +31,18 @@ func GetNode(ctx context.Context, name string) (*Node, error) {
 		return nil, err
 	}
 	return &node, nil
+}
+
+func GetNodes(ctx context.Context) ([]string, error) {
+	output, err := exec.CommandContext(ctx, "kubectl", "get", "nodes", "-o", `jsonpath="{.items[*].metadata.name}"`).Output()
+	if err != nil {
+		return nil, err
+	}
+	out := strings.TrimSpace(string(output))
+	out = strings.Trim(out, "\"")
+	out = strings.TrimSpace(out)
+	nodes := strings.Split(out, " ")
+	return nodes, nil
 }
 
 func LabelNode(ctx context.Context, name string, key string, value string) error {
