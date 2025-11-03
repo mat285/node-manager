@@ -1,0 +1,2 @@
+node: zstation
+serviceRefreshIntervalSeconds: 30
